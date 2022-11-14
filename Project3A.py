@@ -2,12 +2,14 @@ import json
 import requests
 import pygal
 import datetime
-from dateutil.relativedelta import relativedelta
+import lxml
+from dateutil import relativedelta
 
 # Global variable for while loop
 run = True
 
-# Function to to supply prompt and get user input
+
+# Function to supply prompt and get user input
 def userInput(prompt, inputText):
     # Prompt user
     print(prompt)
@@ -15,6 +17,7 @@ def userInput(prompt, inputText):
     selection = input(inputText)
     # Return user input
     return selection
+
 
 # Function to get user input for chart type
 def chartSelection(invalidInputText):
@@ -31,6 +34,7 @@ def chartSelection(invalidInputText):
         return "line"
     elif (selection == "2"):
         return "bar"
+
 
 # Function to get user input for time series selection
 def timeSeries(invalidInputText):
@@ -51,6 +55,7 @@ def timeSeries(invalidInputText):
     if (selection == "4"):
         return "TIME_SERIES_MONTHLY"
 
+
 # Function to get user input for start date
 def startDate(dateErrorPrompt):
     date_format = '%Y-%m-%d'
@@ -66,9 +71,10 @@ def startDate(dateErrorPrompt):
             # printing the appropriate text if ValueError occurs
             selection = userInput(dateErrorPrompt, inputText)
         else:
-            #No error, break loop
+            # No error, break loop
             break
     return dateObject
+
 
 # Function to get user input for end date
 def endDate(dateErrorPrompt):
@@ -89,6 +95,7 @@ def endDate(dateErrorPrompt):
             break
     return dateObject
 
+
 # Function to parse data
 def parseData(data, timeSeries, date):
     # Cast date as string
@@ -107,6 +114,7 @@ def parseData(data, timeSeries, date):
         high = None
     return open, high, low, close
 
+
 # Function to assign time series for JSON
 def jsonTime(timeOption):
     if (timeOption == "TIME_SERIES_INTRADAY"):
@@ -118,18 +126,19 @@ def jsonTime(timeOption):
     elif (timeOption == "TIME_SERIES_MONTHLY"):
         return "Monthly Time Series"
 
+
 # Function to build chart
 def buildChart(user_symbol, chartType, data, timeSeries, startDate, endDate):
     # Variable for iterating dictionary
     i = 0
-    
+
     # Variables for assigning start and end dates to graph title
     tmpStart = startDate
     tmpEnd = endDate
-    
+
     # Variable for graph title assignment
     graphTitle = 'Stock Data for ' + user_symbol + ": " + str(tmpStart) + " to " + str(tmpEnd)
-    
+
     # Lists for adding values to graphs
     openList = []
     closeList = []
@@ -137,7 +146,7 @@ def buildChart(user_symbol, chartType, data, timeSeries, startDate, endDate):
     lowList = []
     dateList = []
     # Delta time for date iteration
-    if(timeSeries == "Time Series (5min)"):
+    if (timeSeries == "Time Series (5min)"):
         startDate = datetime.datetime.strptime(str(startDate) + ' 00:00:00', '%Y-%m-%d %H:%M:%S')
         endDate = datetime.datetime.strptime(str(endDate) + ' 00:00:00', '%Y-%m-%d %H:%M:%S')
         delta = datetime.timedelta(minutes=5)
@@ -148,10 +157,10 @@ def buildChart(user_symbol, chartType, data, timeSeries, startDate, endDate):
         # Create line chart
         lineChart = pygal.Line()
         # For all data entries, iterate and add to list
-        while(startDate <= endDate):
+        while (startDate <= endDate):
             open, high, low, close = parseData(data, timeSeries, startDate)
             # If no data available for date, skip
-            if(open == None and high == None and low == None and close == None):
+            if (open == None and high == None and low == None and close == None):
                 startDate += delta
                 continue
             # Add data to lists
@@ -176,10 +185,10 @@ def buildChart(user_symbol, chartType, data, timeSeries, startDate, endDate):
         # Create bar chart
         barChart = pygal.Bar()
         # For all data entries, iterate and add to list
-        while(startDate <= endDate):
+        while (startDate <= endDate):
             open, high, low, close = parseData(data, timeSeries, startDate)
             # If no data available for date, skip
-            if(open == None and high == None and low == None and close == None):
+            if (open == None and high == None and low == None and close == None):
                 startDate += delta
                 continue
             # Add data to lists
@@ -204,12 +213,13 @@ def buildChart(user_symbol, chartType, data, timeSeries, startDate, endDate):
         # Error message
         print("ERROR")
 
+
 # Function to get data from the API
 def queryAPI(functionType, symbol, outputSize, key):
     # URL construction for API request
     # If time series is intraday, assign alternate url for correct API request
-    if(functionType == "TIME_SERIES_INTRADAY"):
-        url = "https://www.alphavantage.co/query?function=" + functionType + "&symbol=" + symbol +"&interval=5min&outputsize=" + outputSize + "&apikey=" + key
+    if (functionType == "TIME_SERIES_INTRADAY"):
+        url = "https://www.alphavantage.co/query?function=" + functionType + "&symbol=" + symbol + "&interval=5min&outputsize=" + outputSize + "&apikey=" + key
     # If time series is not intraday, assign this URL
     else:
         url = "https://www.alphavantage.co/query?function=" + functionType + "&symbol=" + symbol + "&outputsize=" + outputSize + "&apikey=" + key
@@ -220,6 +230,7 @@ def queryAPI(functionType, symbol, outputSize, key):
     # Return data
     return data
 
+
 # While loop to run program and allow for repetition
 while (run == True):
     # Variable for invalid selection input text
@@ -227,7 +238,7 @@ while (run == True):
     invalidInputDatesFormat = "Invalid date! Enter the date in YYYY-MM-DD format:  "
     # Variable for date error prompt
     dateErrorPrompt = "\nIncorrect date format. Enter the start Date in YYYY-MM-DD format"
-    
+
     # Variables for output size and API key parameters
     outputSize = "full"
     key = "DLEZPCELNFARX2UF"
@@ -266,11 +277,11 @@ while (run == True):
 
     # Builds chart and opens it in browser
     buildChart(user_symbol, chartOption, data, jTime, startTime, endTime)
-    
+
     # Check if the user would like to visualize another stock
     user_continue = input("Would you like to view more stock data?\n Press 'y' to continue: ")
     if (user_continue == "y"):
         # Repeat program by iterating through while loop again
         run = True
     else:
-        # End program
+        run = False
