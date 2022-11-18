@@ -10,6 +10,7 @@ from wtforms import (
 )
 from datetime import date
 from wtforms.fields.html5 import DateField
+#from wtforms.fields import DateField
 from wtforms.validators import URL, DataRequired, Email, EqualTo, Length
 
 class StockForm(FlaskForm):

@@ -26,15 +26,17 @@ def stocks():
             else:
                 #query the api using the form data
                 err = None
-                 
+                key = "DLEZPCELNFARX2UF"
+                outputSize = "full"
                 #THIS IS WHERE YOU WILL CALL THE METHODS FROM THE CHARTS.PY FILE AND IMPLEMENT YOUR CODE
-            
+
+                timeSeries = jsonTime(time_series)
+                data = queryAPI(time_series, symbol, outputSize, key)
                 
                 
-                
-                
+                chart = buildChart(symbol, chart_type, data, timeSeries, start_date, end_date)
                 #This chart variable is what is passed to the stock.html page to render the chart returned from the api
-                chart = "ASSIGN CHART TO THIS VARIABLE"
+                #chart = "ASSIGN CHART TO THIS VARIABLE"
 
             return render_template("stock.html", form=form, template="form-template", err = err, chart = chart)
     
